@@ -1,0 +1,6 @@
+[submodule "waywall-browser-source"]
+	path = waywall-browser-source
+	url = https://github.com/lincoln-lm/waywall-browser-source
+[submodule "ninjabrain-bot-overlay"]
+	path = ninjabrain-bot-overlay
+	url = https://github.com/lincoln-lm/ninjabrain-bot-overlay
