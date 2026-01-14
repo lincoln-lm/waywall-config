@@ -7,6 +7,8 @@ local colors = {
     pink = "#f681f6",
     magenta = "#9e4cc8",
     purple = "#6e1c98",
+    white = "#ffffff",
+    black = "#000000",
 
     base_f3_text = "#dddddd",
     base_entities = "#e446c4",
@@ -52,6 +54,12 @@ local e_counter_src = {
     w = 37,
     h = 9
 }
+local block_coords_src = {
+    x = 170,
+    y = 505,
+    w = 460,
+    h = 38
+}
 
 local thin_pie = {
     x = 1490,
@@ -67,6 +75,11 @@ local thin_e_counter = {
     x = 1490,
     y = 400,
     size = 7
+}
+local block_coords = {
+    x = 896,
+    y = 835,
+    size = 1.66666666
 }
 
 local images = {
@@ -174,6 +187,11 @@ local config = {
         rainbow_timer = {
             vertex = util.read_file("timer.vert"),
             fragment = util.read_file("timer.frag")
+        },
+        block_coords = {
+            vertex = util.read_file("block_coords.vert"),
+            fragment = string.gsub(util.read_file("block_coords.frag"), "ANCHOR", block_coords_src.x .. "," ..
+                block_coords_src.y .. "," .. block_coords_src.w .. "," .. block_coords_src.h)
         }
     }
 }
@@ -207,8 +225,8 @@ local mirrors = {
         dst = {
             x = thin_e_counter.x,
             y = thin_e_counter.y,
-            w = 37 * thin_e_counter.size,
-            h = 9 * thin_e_counter.size
+            w = e_counter_src.w * thin_e_counter.size,
+            h = e_counter_src.h * thin_e_counter.size
         },
         color_key = {
             input = colors.base_f3_text,
@@ -220,13 +238,23 @@ local mirrors = {
         dst = {
             x = thin_e_counter.x + 4,
             y = thin_e_counter.y + 4,
-            w = 37 * thin_e_counter.size,
-            h = 9 * thin_e_counter.size
+            w = e_counter_src.w * thin_e_counter.size,
+            h = e_counter_src.h * thin_e_counter.size
         },
         color_key = {
             input = colors.base_f3_text,
             output = colors.pink
         }
+    }),
+    block_coords = util.make_mirror({
+        src = block_coords_src,
+        dst = {
+            x = block_coords.x,
+            y = block_coords.y,
+            w = block_coords_src.w * block_coords.size,
+            h = block_coords_src.h * block_coords.size
+        },
+        shader = "block_coords"
     }),
     thin_pie_entities = util.make_mirror({
         src = pie_src,
@@ -382,6 +410,8 @@ local show_mirrors = function(eye, f3, tall, thin, wide)
 
     mirrors.e_counter(f3)
     mirrors.e_counter_shadow(f3)
+
+    mirrors.block_coords(true)
 
     texts.preemptive(thin)
     images.circle_overlay(thin)
