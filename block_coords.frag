@@ -52,7 +52,7 @@ vec4 getPixel(ivec4 anchor, vec2 f_src_pos, sampler2D u_texture) {
             break;
         }
     }
-    if (line_end == 0) {
+    if (line_end == 0 || x_end == 0 || y_end == 0) {
         return vec4(0.0, 0.0, 0.0, 0.0);
     }
     current_texel.x -= (anchor.z - line_end) / 2;
