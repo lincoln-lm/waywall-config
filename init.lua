@@ -503,6 +503,7 @@ config.actions = {
     [startup_programs_key] = function()
         if not is_ninb_running() then
             exec_ninb()
+            waywall.sleep(2000)
             exec_browser_sources()
         end
     end,
