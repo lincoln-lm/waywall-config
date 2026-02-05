@@ -492,6 +492,7 @@ config.actions = {
 
     [tall_key] = function()
         resolutions.tall()
+        return false
     end,
 
     [show_ninbot_key] = function()
@@ -512,6 +513,7 @@ config.actions = {
         oneshot_overlay_state.enabled = not oneshot_overlay_state.enabled
         show_mirrors(last_mirror_state.eye, last_mirror_state.f3, last_mirror_state.tall, last_mirror_state.thin,
             last_mirror_state.wide)
+        return false
     end
 
 }
