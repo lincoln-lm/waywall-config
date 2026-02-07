@@ -1,6 +1,7 @@
 local waywall = require("waywall")
 local helpers = require("waywall.helpers")
 local util = require("util")
+local ninbot = require("ninbot")
 
 local colors = {
     soft_pink = "#f28dff",
@@ -21,6 +22,7 @@ local colors = {
 }
 
 local ninjabrain_bot_path = util.config_folder("Ninjabrain-Bot-1.5.1.jar")
+local ninjabrain_bot_prefs_path = os.getenv("HOME") .. "/.java/.userPrefs/ninjabrainbot/prefs.xml"
 local measuring_overlay_path = util.config_folder("overlay.png")
 local circle_overlay_path = util.config_folder("circle_ovl.png")
 local oneshot_overlay_path = util.config_folder("oneshot.png")
@@ -34,6 +36,63 @@ local show_ninbot_key = "*-apostrophe"
 local toggle_fullscreen_key = "Shift-O"
 local startup_programs_key = "Shift-P"
 local enable_oneshot_overlay_key = "H"
+
+local ninbot_prefs = {
+    custom_themes = {{
+        name = "Castorice",
+
+        title_bar = "#220248",
+        header_background = "#460374",
+        result_background = "#721EAA",
+        throws_background = "#460374",
+        dividers = "#220248",
+        header_dividers = "#220248",
+        text = "#E2E0F6",
+        title_text = "#E2E0F6",
+        throws_text = "#E2E0F6",
+        divine_text = "#E2E0F6",
+        version_text = "#E2E0F6",
+        header_text = "#E2E0F6",
+        subpixel_increase = "#8FD485",
+        subpixel_decrease = "#DD7E70",
+        certainty_100 = "#9CCFD8",
+        certainty_50 = "#F6C177",
+        certainty_0 = "#EB6F92"
+    }},
+    angle_adjustment_display_type = "1",
+    angle_adjustment_type = "1",
+    auto_reset = "true",
+    color_negative_coords = "true",
+    direction_help_enabled = "true",
+    enable_http_server = "true",
+    hotkey_boat_code = "43",
+    hotkey_boat_modifier = "0",
+    hotkey_decrement_code = "57419",
+    hotkey_decrement_modifier = "0",
+    hotkey_increment_code = "57421",
+    hotkey_increment_modifier = "0",
+    hotkey_lock_code = "26",
+    hotkey_lock_modifier = "0",
+    hotkey_minimize_code = "42",
+    hotkey_minimize_modifier = "0",
+    hotkey_reset_code = "51",
+    hotkey_reset_modifier = "0",
+    hotkey_undo_code = "52",
+    hotkey_undo_modifier = "0",
+    language_v2 = "en-US",
+    mismeasure_warning_enabled = "true",
+    sensitivity = "0.02291165",
+    settings_version = "2",
+    show_angle_errors = "true",
+    show_angle_updates = "true",
+    sigma = "0.0229",
+    sigma_boat = "7.0E-4",
+    size = "0",
+    theme = "-1",
+    translucent = "false",
+    use_precise_angle = "true",
+    view = "1"
+}
 
 -- 2560x1600
 local pie_src = {
@@ -503,6 +562,7 @@ config.actions = {
 
     [startup_programs_key] = function()
         if not is_ninb_running() then
+            ninbot.write_prefs(ninbot_prefs, ninjabrain_bot_prefs_path)
             exec_ninb()
             waywall.sleep(2000)
             exec_browser_sources()
