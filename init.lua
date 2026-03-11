@@ -247,9 +247,9 @@ local config = {
             vertex = util.read_file("timer.vert"),
             fragment = util.read_file("timer.frag")
         },
-        rainbow_hitbox = {
-            vertex = util.read_file("rainbow_hitbox.vert"),
-            fragment = util.read_file("rainbow_hitbox.frag")
+        cosmetics = {
+            vertex = util.read_file("cosmetics.vert"),
+            fragment = util.read_file("cosmetics.frag")
         },
         block_coords = {
             vertex = util.read_file("block_coords.vert"),
@@ -439,7 +439,7 @@ local mirrors = {
         },
         shader = "rainbow_timer"
     }),
-    rainbow_hitbox = util.make_mirror({
+    cosmetics = util.make_mirror({
         src = {
             x = 0,
             y = 0,
@@ -452,7 +452,7 @@ local mirrors = {
             w = 2560,
             h = 1600
         },
-        shader = "rainbow_hitbox"
+        shader = "cosmetics"
     })
 }
 
@@ -479,7 +479,7 @@ local show_mirrors = function(eye, f3, tall, thin, wide)
         wide = wide
     }
     mirrors.rainbow_timer(not (eye or f3 or tall or thin or wide))
-    mirrors.rainbow_hitbox(not (eye or f3 or tall or thin or wide))
+    mirrors.cosmetics(not (eye or f3 or tall or thin or wide))
     mirrors.eye_measure(eye)
 
     images.measuring_overlay(eye)
