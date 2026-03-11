@@ -243,9 +243,9 @@ local config = {
         scene_add_text = true
     },
     shaders = {
-        rainbow_timer = {
-            vertex = util.read_file("timer.vert"),
-            fragment = util.read_file("timer.frag")
+        timer_cosmetics = {
+            vertex = util.read_file("timer_cosmetics.vert"),
+            fragment = util.read_file("timer_cosmetics.frag")
         },
         cosmetics = {
             vertex = util.read_file("cosmetics.vert"),
@@ -424,7 +424,7 @@ local mirrors = {
             h = 500
         }
     }),
-    rainbow_timer = util.make_mirror({
+    timer_cosmetics = util.make_mirror({
         src = {
             x = 2560 - 392,
             y = 475,
@@ -437,7 +437,7 @@ local mirrors = {
             w = 352,
             h = 115
         },
-        shader = "rainbow_timer"
+        shader = "timer_cosmetics"
     }),
     cosmetics = util.make_mirror({
         src = {
@@ -478,7 +478,7 @@ local show_mirrors = function(eye, f3, tall, thin, wide)
         thin = thin,
         wide = wide
     }
-    mirrors.rainbow_timer(not (eye or f3 or tall or thin or wide))
+    mirrors.timer_cosmetics(not (eye or f3 or tall or thin or wide))
     mirrors.cosmetics(not (eye or f3 or tall or thin or wide))
     mirrors.eye_measure(eye)
 
