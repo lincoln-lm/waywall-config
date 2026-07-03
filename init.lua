@@ -36,6 +36,7 @@ local show_ninbot_key = "*-apostrophe"
 local toggle_fullscreen_key = "Shift-O"
 local startup_programs_key = "Shift-P"
 local enable_oneshot_overlay_key = "H"
+local enable_full_pie_key = "*-Ctrl-Alt_L"
 
 local ninbot_prefs = {
     custom_themes = {{
@@ -63,6 +64,7 @@ local ninbot_prefs = {
     angle_adjustment_type = "1",
     auto_reset = "true",
     color_negative_coords = "true",
+    default_boat_type = "2",
     direction_help_enabled = "true",
     enable_http_server = "true",
     hotkey_boat_code = "43",
@@ -100,6 +102,13 @@ local pie_src = {
     y = 1190,
     w = 340,
     h = 178
+}
+local full_pie_scale = 2
+local full_pie_src = {
+    x = 2220,
+    y = 1200,
+    w = 340,
+    h = 278
 }
 local percent_src = {
     x = 257,
@@ -217,13 +226,15 @@ local browser_sources = {
     }
 }
 
+local base_sens = 5.7
+
 local config = {
     input = {
         layout = "us",
         repeat_rate = 40,
         repeat_delay = 300,
 
-        sensitivity = 1.0,
+        sensitivity = base_sens,
         confine_pointer = false,
         remaps = {
             ["MB4"] = "HOME",
@@ -318,6 +329,15 @@ local mirrors = {
             h = block_coords_src.h * block_coords.size
         },
         shader = "block_coords"
+    }),
+    pie_magnifier = util.make_mirror({
+        src = full_pie_src,
+        dst = {
+            x = full_pie_src.x + full_pie_src.w * (-full_pie_scale + 1),
+            y = full_pie_src.y + full_pie_src.h * (-full_pie_scale + 1),
+            w = full_pie_src.w * full_pie_scale,
+            h = full_pie_src.h * full_pie_scale
+        }
     }),
     thin_pie_entities = util.make_mirror({
         src = pie_src,
@@ -468,7 +488,16 @@ local oneshot_overlay_state = {
     enabled = false
 }
 
+local full_pie_state = {
+    enabled = false
+}
+
 local show_mirrors = function(eye, f3, tall, thin, wide)
+    if tall then
+        waywall.set_sensitivity(0.5)
+    else
+        waywall.set_sensitivity(base_sens)
+    end
     text_configs.memory_left.value = "Mem: " .. get_memory_left() .. " MB"
 
     last_mirror_state = {
@@ -479,11 +508,13 @@ local show_mirrors = function(eye, f3, tall, thin, wide)
         wide = wide
     }
     mirrors.timer_cosmetics(not (eye or f3 or tall or thin or wide))
+    mirrors.pie_magnifier(not (eye or f3 or tall or thin or wide))
     mirrors.cosmetics(not (eye or f3 or tall or thin or wide))
     mirrors.eye_measure(eye)
 
     images.measuring_overlay(eye)
     images.oneshot_overlay(oneshot_overlay_state.enabled and not (eye or f3 or tall or thin or wide))
+    mirrors.pie_magnifier(full_pie_state.enabled and not (eye or f3 or tall or thin or wide))
 
     texts.memory_left(thin or wide)
 
@@ -573,6 +604,13 @@ config.actions = {
         oneshot_overlay_state.enabled = not oneshot_overlay_state.enabled
         show_mirrors(last_mirror_state.eye, last_mirror_state.f3, last_mirror_state.tall, last_mirror_state.thin,
             last_mirror_state.wide)
+        return false
+    end,
+
+    [enable_full_pie_key] = function()
+        full_pie_state.enabled = not full_pie_state.enabled
+        thin_enable()
+        res_disable()
         return false
     end
 
