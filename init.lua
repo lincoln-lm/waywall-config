@@ -37,6 +37,7 @@ local toggle_fullscreen_key = "Shift-O"
 local startup_programs_key = "Shift-P"
 local enable_oneshot_overlay_key = "H"
 local enable_full_pie_key = "*-Ctrl-Alt_L"
+local chat_message_key = "*-Ctrl-Shift-T"
 
 local ninbot_prefs = {
     custom_themes = {{
@@ -195,13 +196,202 @@ local text_configs = {
         size = 6,
         color = colors.soft_pink,
         outline_color = colors.magenta
+    },
+    chat_input = {
+        value = "Hello World!",
+        x = 1490,
+        y = 1250,
+        outline_size = 2,
+        size = 5,
+        color = colors.soft_pink,
+        outline_color = colors.magenta
     }
 }
 
 local texts = {
     memory_left = util.make_outlined_text(text_configs.memory_left),
-    preemptive = util.make_outlined_text(text_configs.preemptive)
+    preemptive = util.make_outlined_text(text_configs.preemptive),
+    chat_input = util.make_outlined_text(text_configs.chat_input)
 }
+
+local normalize_key = function(key)
+    key = key:match("([^-]*)$")
+    key = key:lower()
+    return key
+end
+
+local key_to_char = {
+    ["space"] = " ",
+    ["equal"] = "=",
+    ["comma"] = ",",
+    ["minus"] = "-",
+    ["period"] = ".",
+    ["slash"] = "/",
+    ["0"] = "0",
+    ["1"] = "1",
+    ["2"] = "2",
+    ["3"] = "3",
+    ["4"] = "4",
+    ["5"] = "5",
+    ["6"] = "6",
+    ["7"] = "7",
+    ["8"] = "8",
+    ["9"] = "9",
+    ["semicolon"] = ";",
+    ["bracketleft"] = "[",
+    ["backslash"] = "\\",
+    ["bracketright"] = "]",
+    ["apostrophe"] = "'",
+    ["grave"] = "`",
+    ["a"] = "a",
+    ["b"] = "b",
+    ["c"] = "c",
+    ["d"] = "d",
+    ["e"] = "e",
+    ["f"] = "f",
+    ["g"] = "g",
+    ["h"] = "h",
+    ["i"] = "i",
+    ["j"] = "j",
+    ["k"] = "k",
+    ["l"] = "l",
+    ["m"] = "m",
+    ["n"] = "n",
+    ["o"] = "o",
+    ["p"] = "p",
+    ["q"] = "q",
+    ["r"] = "r",
+    ["s"] = "s",
+    ["t"] = "t",
+    ["u"] = "u",
+    ["v"] = "v",
+    ["w"] = "w",
+    ["x"] = "x",
+    ["y"] = "y",
+    ["z"] = "z",
+    ["braceleft"] = "{",
+    ["braceright"] = "}",
+    ["nobreakspace"] = " ",
+    ["hyphen"] = "-"
+}
+
+local key_to_shift = {
+    ["1"] = "!",
+    ["2"] = "@",
+    ["3"] = "#",
+    ["4"] = "$",
+    ["5"] = "%",
+    ["6"] = "^",
+    ["7"] = "&",
+    ["8"] = "*",
+    ["9"] = "(",
+    ["0"] = ")",
+    ["'"] = "\"",
+    [";"] = ":",
+    [","] = "<",
+    ["="] = "+",
+    ["."] = ">",
+    ["/"] = "?",
+    ["-"] = "_",
+    ["\\"] = "|",
+    ["`"] = "~"
+}
+
+local special_chat_keys = {"Backspace", "Return", "Escape", "Up", "Down"}
+local chat_state = {
+    active = false
+}
+
+local input_chat_key = function(chat_key)
+    if chat_key == "Return" then
+        io.popen(util.config_folder("send_twitch_message.sh") .. " " .. util.config_folder(".twitch_token") .. " '" ..
+                     string.sub(string.gsub(text_configs.chat_input.value, "'", "'\\''") .. "'", 2)):close()
+        text_configs.chat_input.value = ""
+        chat_state.active = false
+    elseif chat_key == "Escape" then
+        text_configs.chat_input.value = ""
+        chat_state.active = false
+    elseif chat_key == "Backspace" then
+        if string.len(text_configs.chat_input.value) > 1 then
+            text_configs.chat_input.value = string.sub(text_configs.chat_input.value, 1, -2)
+        end
+    elseif chat_key == "Up" then
+        if string.len(text_configs.chat_input.value) > 1 then
+            last_char = string.sub(text_configs.chat_input.value, -1)
+            text_configs.chat_input.value = string.sub(text_configs.chat_input.value, 1, -2) ..
+                                                (key_to_shift[last_char] or last_char:upper())
+        end
+    elseif chat_key == "Down" then
+        if string.len(text_configs.chat_input.value) > 1 then
+            last_char = string.sub(text_configs.chat_input.value, -1)
+            found = false
+            for key, value in pairs(key_to_shift) do
+                if value == last_char then
+                    text_configs.chat_input.value = string.sub(text_configs.chat_input.value, 1, -2) .. key
+                    found = true
+                    break
+                end
+            end
+            if not found then
+                text_configs.chat_input.value = string.sub(text_configs.chat_input.value, 1, -2) .. last_char:lower()
+            end
+        end
+    else
+        text_configs.chat_input.value = text_configs.chat_input.value .. (key_to_char[chat_key] or chat_key)
+    end
+    texts.chat_input(false)
+    texts.chat_input(true)
+end
+
+-- evil evil function
+local add_chat_actions = function(actions)
+    local existing_actions = {}
+
+    for original_key, value in pairs(actions) do
+        key = normalize_key(original_key)
+        if not existing_actions[key] then
+            existing_actions[key] = {}
+        end
+        table.insert(existing_actions[key], {original_key, value})
+    end
+
+    for chat_key, _ in pairs(key_to_char) do
+        if existing_actions[chat_key] then
+            for _, kvp in ipairs(existing_actions[chat_key]) do
+                local original_key, original_function = kvp[1], kvp[2]
+                actions[original_key] = function()
+                    if not chat_state.active then
+                        return original_function()
+                    else
+                        input_chat_key(chat_key)
+                        return true
+                    end
+                end
+            end
+        end
+        if not actions["*-" .. chat_key] then
+            actions["*-" .. chat_key] = function()
+                if not chat_state.active then
+                    return false
+                else
+                    input_chat_key(chat_key)
+                    return true
+                end
+            end
+        end
+    end
+
+    for _, special_key in ipairs(special_chat_keys) do
+        actions[special_key] = function()
+            if not chat_state.active then
+                return false
+            else
+                input_chat_key(special_key)
+                return true
+            end
+        end
+    end
+end
 
 local browser_sources = {
     spotify = {
@@ -571,6 +761,10 @@ local resolutions = {
     wide = make_res(2560, 400, wide_enable, res_disable)
 }
 
+waywall.listen("load", function()
+    chat_state.active = false
+end)
+
 config.actions = {
     [thin_key] = function()
         resolutions.thin()
@@ -612,8 +806,17 @@ config.actions = {
         thin_enable()
         res_disable()
         return false
-    end
+    end,
 
+    [chat_message_key] = function()
+        text_configs.chat_input.value = ">"
+        texts.chat_input(false)
+        texts.chat_input(true)
+        chat_state.active = true
+        return false
+    end
 }
+
+add_chat_actions(config.actions)
 
 return config
