@@ -15,6 +15,7 @@ local colors = {
     base_entities = "#e446c4",
     base_prepare = "#464c46",
     base_unspecified = "#46ce66",
+
     base_unspecified_percent = "#45cb65",
     base_blockentities = "#ec6e4e",
     base_blockentities_percent = "#e96d4d",
@@ -674,6 +675,10 @@ local last_mirror_state = {
     wide = false
 }
 
+local last_state = {
+    screen = "wall"
+}
+
 local oneshot_overlay_state = {
     enabled = false
 }
@@ -697,7 +702,7 @@ local show_mirrors = function(eye, f3, tall, thin, wide)
         thin = thin,
         wide = wide
     }
-    mirrors.timer_cosmetics(not (eye or f3 or tall or thin or wide))
+    mirrors.timer_cosmetics(not (eye or f3 or tall or thin or wide or last_state.screen == "wall"))
     mirrors.pie_magnifier(not (eye or f3 or tall or thin or wide))
     mirrors.cosmetics(not (eye or f3 or tall or thin or wide))
     mirrors.eye_measure(eye)
@@ -763,6 +768,20 @@ local resolutions = {
 
 waywall.listen("load", function()
     chat_state.active = false
+end)
+
+waywall.listen("state", function()
+    if waywall.state().screen ~= last_state.screen then
+        local from = last_state.screen
+        local to = waywall.state().screen
+        last_state = waywall.state()
+        if from ~= to then
+            show_mirrors(last_mirror_state.eye, last_mirror_state.f3, last_mirror_state.tall, last_mirror_state.thin,
+                last_mirror_state.wide)
+            thin_enable()
+            res_disable()
+        end
+    end
 end)
 
 config.actions = {
