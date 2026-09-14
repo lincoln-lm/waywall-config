@@ -9,6 +9,9 @@ window.addEventListener("DOMContentLoaded", () => {
         --player-background-color: transparent;
         --song-text-color: #e0def4;
         --artist-text-color: #eb6f92;
+        position: absolute;
+        transform-origin: top left;
+        scale: 0.6;
     }
     `;
   document.head.appendChild(style);

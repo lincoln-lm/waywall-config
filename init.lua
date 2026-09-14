@@ -29,6 +29,7 @@ local circle_overlay_path = util.config_folder("circle_ovl.png")
 local oneshot_overlay_path = util.config_folder("oneshot.png")
 local browser_source_path = util.config_folder("waywall-browser-source")
 local ninjabrain_bot_overlay_path = util.config_folder("ninjabrain-bot-overlay")
+local all_portals_overlay_path = util.config_folder("all-portals-overlay")
 
 local thin_key = "*-Caps_Lock"
 local wide_key = "*-Tab"
@@ -191,6 +192,7 @@ local text_configs = {
     },
     preemptive = {
         value = "51 pure\n61 chest front\n67 chest back",
+        -- value = "29 pure\n47 chest front\n61 chest back",
         x = 1490,
         y = 1250,
         outline_size = 2,
@@ -414,10 +416,21 @@ local browser_sources = {
             waywall.exec('uv run --project ' .. ninjabrain_bot_overlay_path .. ' ' .. ninjabrain_bot_overlay_path ..
                              '/main.py')
         end
+    },
+    all_portals_overlay = {
+        url = "http://localhost:5002/",
+        preload = util.config_folder("preload-all-portals.js"),
+        width = 2560,
+        height = 1600,
+        exec_before = function()
+            waywall.exec('uv run --project ' .. all_portals_overlay_path .. ' ' .. all_portals_overlay_path ..
+                             '/main.py')
+        end
     }
 }
 
-local base_sens = 5.7
+-- local base_sens = 5.7
+local base_sens = 5.7 * 1.6666666
 
 local config = {
     input = {
@@ -436,6 +449,7 @@ local config = {
     theme = {
         background_png = util.config_folder("castorice.png"),
         cursor_theme = "Castorice",
+        cursor_icon = "default",
         ninb_anchor = "topright"
     },
     experimental = {
@@ -470,7 +484,7 @@ local get_memory_left = function()
 end
 
 local exec_ninb = function()
-    waywall.exec("java -Dawt.useSystemAAFontSettings=on -Dsun.java2d.uiScale=2.0 -jar " .. ninjabrain_bot_path)
+    waywall.exec("java -Dawt.useSystemAAFontSettings=on -Dsun.java2d.uiScale=1.0 -jar " .. ninjabrain_bot_path)
 end
 
 local exec_browser_sources = function()
@@ -689,7 +703,7 @@ local full_pie_state = {
 
 local show_mirrors = function(eye, f3, tall, thin, wide)
     if tall then
-        waywall.set_sensitivity(0.5)
+        waywall.set_sensitivity(0.5 * 1.66666)
     else
         waywall.set_sensitivity(base_sens)
     end
@@ -716,6 +730,7 @@ local show_mirrors = function(eye, f3, tall, thin, wide)
     mirrors.e_counter(f3)
     mirrors.e_counter_shadow(f3)
 
+    mirrors.cosmetics(last_state.screen == "wall")
     mirrors.block_coords(true)
 
     texts.preemptive(thin)
@@ -784,6 +799,11 @@ waywall.listen("state", function()
     end
 end)
 
+config.window = {
+    fullscreen_width = 2560,
+    fullscreen_height = 1600,
+}
+
 config.actions = {
     [thin_key] = function()
         resolutions.thin()
@@ -833,9 +853,17 @@ config.actions = {
         texts.chat_input(true)
         chat_state.active = true
         return false
+    end,
+
+    ["*-Ctrl-Shift-Left"] = function()
+        io.popen("curl -X POST http://localhost:5002/message -d \"message={\\\"type\\\":\\\"prev\\\"}\""):close()
+    end,
+
+    ["*-Ctrl-Shift-Right"] = function()
+        io.popen("curl -X POST http://localhost:5002/message -d \"message={\\\"type\\\":\\\"next\\\"}\""):close()
     end
 }
 
-add_chat_actions(config.actions)
+-- add_chat_actions(config.actions)
 
 return config
