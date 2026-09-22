@@ -2,6 +2,7 @@ local waywall = require("waywall")
 local helpers = require("waywall.helpers")
 local util = require("util")
 local ninbot = require("ninbot")
+local standard_settings = require("standard_settings")
 
 local colors = {
     soft_pink = "#f28dff",
@@ -22,8 +23,12 @@ local colors = {
     base_destroyProgress = "#cc6c46"
 }
 
+local all_portals = false
+
 local ninjabrain_bot_path = util.config_folder("Ninjabrain-Bot-1.5.1.jar")
 local ninjabrain_bot_prefs_path = os.getenv("HOME") .. "/.java/.userPrefs/ninjabrainbot/prefs.xml"
+local standard_settings_path = os.getenv("HOME") ..
+                                   "/.local/share/PrismLauncher/instances/1.16.1/minecraft/config/mcsr/standardsettings.json"
 local measuring_overlay_path = util.config_folder("overlay.png")
 local circle_overlay_path = util.config_folder("circle_ovl.png")
 local oneshot_overlay_path = util.config_folder("oneshot.png")
@@ -97,6 +102,153 @@ local ninbot_prefs = {
     translucent = "false",
     use_precise_angle = "true",
     view = "1"
+}
+
+local settings = {
+    [".apiVersion"] = "2.2+1.16-1.16.1",
+    [".modVersion"] = "2.3+1.16-1.16.1",
+    [".dataVersion"] = 0,
+    ["fov"] = 110.0,
+    ["realmsNotifications"] = true,
+    ["fullscreenResolution"] = "null",
+    ["biomeBlendRadius"] = 2.0,
+    ["graphicsMode"] = 0,
+    ["renderDistance"] = all_portals and 32.0 or 8.0,
+    ["ao"] = 2,
+    ["maxFps"] = 200.0,
+    ["enableVsync"] = false,
+    ["bobView"] = false,
+    ["guiScale"] = 5,
+    ["attackIndicator"] = 1,
+    ["gamma"] = 5.0,
+    ["renderClouds"] = 0,
+    ["fullscreen"] = false,
+    ["particles"] = 0,
+    ["mipmapLevels"] = 4.0,
+    ["entityShadows"] = true,
+    ["entityDistanceScaling"] = all_portals and 5.0 or 0.5,
+    ["entityCulling"] = false,
+    ["modelPart_cape"] = true,
+    ["modelPart_jacket"] = true,
+    ["modelPart_left_sleeve"] = true,
+    ["modelPart_right_sleeve"] = true,
+    ["modelPart_left_pants_leg"] = true,
+    ["modelPart_right_pants_leg"] = true,
+    ["modelPart_hat"] = true,
+    ["mainHand"] = 1,
+    ["soundCategory_master"] = 0.61755955,
+    ["soundCategory_music"] = 0.0,
+    ["soundCategory_record"] = 1.0,
+    ["soundCategory_weather"] = 1.0,
+    ["soundCategory_block"] = 1.0,
+    ["soundCategory_hostile"] = 0.45475027,
+    ["soundCategory_neutral"] = 1.0,
+    ["soundCategory_player"] = 1.0,
+    ["soundCategory_ambient"] = 1.0,
+    ["soundCategory_voice"] = 1.0,
+    ["showSubtitles"] = true,
+    ["language"] = "en_us",
+    ["forceUnicodeFont"] = false,
+    ["mouseSensitivity"] = 0.02291165,
+    ["invertYMouse"] = false,
+    ["mouseWheelSensitivity"] = 1.0,
+    ["discrete_mouse_scroll"] = false,
+    ["touchscreen"] = false,
+    ["rawMouseInput"] = false,
+    ["autoJump"] = false,
+    ["key_key.jump"] = "key.keyboard.space",
+    ["key_key.sneak"] = "key.keyboard.left.shift",
+    ["key_key.sprint"] = "key.keyboard.semicolon",
+    ["key_key.left"] = "key.keyboard.a",
+    ["key_key.right"] = "key.keyboard.d",
+    ["key_key.back"] = "key.keyboard.s",
+    ["key_key.forward"] = "key.keyboard.w",
+    ["key_key.attack"] = "key.mouse.left",
+    ["key_key.pickItem"] = "key.mouse.middle",
+    ["key_key.use"] = "key.mouse.right",
+    ["key_key.drop"] = "key.keyboard.q",
+    ["key_key.hotbar.1"] = "key.keyboard.end",
+    ["key_key.hotbar.2"] = "key.keyboard.2",
+    ["key_key.hotbar.3"] = "key.keyboard.3",
+    ["key_key.hotbar.4"] = "key.keyboard.4",
+    ["key_key.hotbar.5"] = "key.keyboard.r",
+    ["key_key.hotbar.6"] = "key.keyboard.c",
+    ["key_key.hotbar.7"] = "key.keyboard.x",
+    ["key_key.hotbar.8"] = "key.keyboard.z",
+    ["key_key.hotbar.9"] = "key.keyboard.home",
+    ["key_key.inventory"] = "key.keyboard.e",
+    ["key_key.swapOffhand"] = "key.keyboard.g",
+    ["key_key.loadToolbarActivator"] = "key.keyboard.left.bracket",
+    ["key_key.saveToolbarActivator"] = "key.keyboard.unknown",
+    ["key_key.playerlist"] = "key.keyboard.tab",
+    ["key_key.chat"] = "key.keyboard.t",
+    ["key_key.command"] = "key.keyboard.slash",
+    ["key_key.advancements"] = "key.keyboard.l",
+    ["key_key.spectatorOutlines"] = "key.keyboard.unknown",
+    ["key_key.screenshot"] = "key.keyboard.f2",
+    ["key_key.smoothCamera"] = "key.keyboard.unknown",
+    ["key_key.fullscreen"] = "key.keyboard.f11",
+    ["key_key.togglePerspective"] = "key.keyboard.f",
+    ["key_Create New World"] = "key.keyboard.f6",
+    ["key_speedrunigt.controls.start_timer"] = "key.keyboard.u",
+    ["key_speedrunigt.controls.stop_timer"] = "key.keyboard.i",
+    ["chatVisibility"] = 0,
+    ["chatColors"] = true,
+    ["chatLinks"] = true,
+    ["chatLinksPrompt"] = true,
+    ["chatOpacity"] = 1.0,
+    ["textBackgroundOpacity"] = 0.5,
+    ["chatScale"] = 1.0,
+    ["chatLineSpacing"] = 0.0,
+    ["chatWidth"] = 1.0,
+    ["chatHeightFocused"] = 1.0,
+    ["chatHeightUnfocused"] = 0.44366195797920227,
+    ["narrator"] = 0,
+    ["autoSuggestions"] = true,
+    ["reducedDebugInfo"] = false,
+    ["backgroundForChatOnly"] = 1,
+    ["chatDelay"] = 0.0,
+    ["toggleCrouch"] = 0,
+    ["toggleSprint"] = 1,
+    ["pauseOnLostFocus"] = true,
+    ["advancedItemTooltips"] = false,
+    ["hitboxes"] = true,
+    ["chunkborders"] = true,
+    ["pieDirectory"] = all_portals and "root.tick.level.entities.blockEntities" or "root.gameRenderer.level.entities",
+    ["perspective"] = {
+        ["enabled"] = false,
+        ["value"] = 0
+    },
+    ["f1"] = {
+        ["enabled"] = false,
+        ["value"] = false
+    },
+    ["sneaking"] = {
+        ["enabled"] = false,
+        ["value"] = false
+    },
+    ["sprinting"] = true,
+    ["fovOnWorldJoin"] = {
+        ["enabled"] = false,
+        ["value"] = 70.0
+    },
+    ["renderDistanceOnWorldJoin"] = {
+        ["enabled"] = false,
+        ["value"] = 12.0
+    },
+    ["entityDistanceScalingOnWorldJoin"] = {
+        ["enabled"] = false,
+        ["value"] = 1.0
+    },
+    ["guiScaleOnWorldJoin"] = {
+        ["enabled"] = false,
+        ["value"] = 0
+    },
+    ["toggleStandardSettings"] = true,
+    ["toggleAll"] = true,
+    ["autoF3Esc"] = true,
+    ["firstAutoF3EscDelay"] = 22,
+    ["triggerOnResize"] = false
 }
 
 -- 2560x1600
@@ -801,7 +953,7 @@ end)
 
 config.window = {
     fullscreen_width = 2560,
-    fullscreen_height = 1600,
+    fullscreen_height = 1600
 }
 
 config.actions = {
@@ -825,8 +977,10 @@ config.actions = {
     [toggle_fullscreen_key] = waywall.toggle_fullscreen,
 
     [startup_programs_key] = function()
+        standard_settings.write_settings(settings, standard_settings_path)
+        print("Saved settings to " .. standard_settings_path)
+        ninbot.write_prefs(ninbot_prefs, ninjabrain_bot_prefs_path)
         if not is_ninb_running() then
-            ninbot.write_prefs(ninbot_prefs, ninjabrain_bot_prefs_path)
             exec_ninb()
             waywall.sleep(2000)
             exec_browser_sources()
