@@ -4,3 +4,6 @@
 [submodule "ninjabrain-bot-overlay"]
 	path = ninjabrain-bot-overlay
 	url = https://github.com/lincoln-lm/ninjabrain-bot-overlay
+[submodule "ww_command_line"]
+	path = ww_command_line
+	url = https://github.com/arjuncgore/ww_command_line.git

@@ -96,10 +96,10 @@ void main() {
     rainbow(0.5, 1.0, 1.0);
   } else if (is_wall) {
     noise();
-  } else if (is_heart) {
-    rainbow(0.5, 1.0, 0.5);
-  } else if (is_heart_dark) {
-    rainbow(0.5, 0.7, 0.5);
+  // } else if (is_heart) {
+  //   rainbow(0.5, 1.0, 0.5);
+  // } else if (is_heart_dark) {
+  //   rainbow(0.5, 0.7, 0.5);
   } else {
     gl_FragColor = color;
   }

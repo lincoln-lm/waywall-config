@@ -1,26 +1,27 @@
 local waywall = require("waywall")
 local helpers = require("waywall.helpers")
+M = {}
 
-local config_folder = function(relative_path)
+M.config_folder = function(relative_path)
     local home = os.getenv("HOME")
     return home .. "/.config/waywall/" .. relative_path
 end
 
-local read_file = function(name)
-    local file = io.open(config_folder(name), "r")
+M.read_file = function(name)
+    local file = io.open(M.config_folder(name), "r")
     local data = file:read("*a")
     file:close()
     return data
 end
 
-local exec_unsafe = function(cmd)
+M.exec_unsafe = function(cmd)
     local handle = io.popen(cmd)
     local result = handle:read("*l")
     handle:close()
     return result
 end
 
-local make_mirror = function(options)
+M.make_mirror = function(options)
     local this = nil
 
     return function(enable)
@@ -33,7 +34,37 @@ local make_mirror = function(options)
     end
 end
 
-local make_text = function(options)
+M.shadowed_res_mirror = function(options, dist, src_color, dst_color_1, dst_color_2, width, height)
+    local first = helpers.res_mirror({
+        src = options.src,
+        dst = {
+            x = options.dst.x + dist,
+            y = options.dst.y + dist,
+            w = options.dst.w,
+            h = options.dst.h
+        },
+        color_key = {
+            input = src_color,
+            output = dst_color_2
+        }
+    }, width, height)
+    local second = helpers.res_mirror({
+        src = options.src,
+        dst = {
+            x = options.dst.x,
+            y = options.dst.y,
+            w = options.dst.w,
+            h = options.dst.h
+        },
+        color_key = {
+            input = src_color,
+            output = dst_color_1
+        }
+    }, width, height)
+    return {first, second}
+end
+
+M.make_text = function(options)
     local this = nil
 
     return function(enable)
@@ -46,7 +77,7 @@ local make_text = function(options)
     end
 end
 
-local make_outlined_text = function(options)
+M.make_outlined_text = function(options)
     local this = nil
 
     return function(enable)
@@ -84,7 +115,7 @@ local make_outlined_text = function(options)
     end
 end
 
-local make_image = function(path, dst)
+M.make_image = function(path, dst)
     local this = nil
 
     return function(enable)
@@ -97,12 +128,4 @@ local make_image = function(path, dst)
     end
 end
 
-return {
-    exec_unsafe = exec_unsafe,
-    make_mirror = make_mirror,
-    make_image = make_image,
-    make_text = make_text,
-    make_outlined_text = make_outlined_text,
-    read_file = read_file,
-    config_folder = config_folder
-}
+return M

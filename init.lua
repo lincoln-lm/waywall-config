@@ -35,16 +35,14 @@ local oneshot_overlay_path = util.config_folder("oneshot.png")
 local browser_source_path = util.config_folder("waywall-browser-source")
 local ninjabrain_bot_overlay_path = util.config_folder("ninjabrain-bot-overlay")
 local all_portals_overlay_path = util.config_folder("all-portals-overlay")
+local canvas_overlay_path = util.config_folder("waywall-canvas")
 
 local thin_key = "*-Caps_Lock"
 local wide_key = "*-Tab"
 local tall_key = "*-J"
 local show_ninbot_key = "*-apostrophe"
-local toggle_fullscreen_key = "Shift-O"
 local startup_programs_key = "Shift-P"
 local enable_oneshot_overlay_key = "H"
-local enable_full_pie_key = "*-Ctrl-Alt_L"
-local chat_message_key = "*-Ctrl-Shift-T"
 
 local ninbot_prefs = {
     custom_themes = {{
@@ -166,7 +164,7 @@ local settings = {
     ["key_key.attack"] = "key.mouse.left",
     ["key_key.pickItem"] = "key.mouse.middle",
     ["key_key.use"] = "key.mouse.right",
-    ["key_key.drop"] = "key.keyboard.q",
+    ["key_key.drop"] = "key.keyboard.o",
     ["key_key.hotbar.1"] = "key.keyboard.end",
     ["key_key.hotbar.2"] = "key.keyboard.2",
     ["key_key.hotbar.3"] = "key.keyboard.3",
@@ -251,6 +249,8 @@ local settings = {
     ["triggerOnResize"] = false
 }
 
+local thin_res = {350, 1600}
+
 -- 2560x1600
 local pie_src = {
     x = 10,
@@ -258,24 +258,11 @@ local pie_src = {
     w = 340,
     h = 178
 }
-local full_pie_scale = 2
-local full_pie_src = {
-    x = 2220,
-    y = 1200,
-    w = 340,
-    h = 278
-}
 local percent_src = {
     x = 257,
     y = 1379,
     w = 33,
     h = 25
-}
-local e_counter_src = {
-    x = 13,
-    y = 37,
-    w = 37,
-    h = 9
 }
 local block_coords_src = {
     x = 170,
@@ -294,11 +281,6 @@ local thin_percent = {
     y = 1050,
     size = 8
 }
-local thin_e_counter = {
-    x = 1490,
-    y = 400,
-    size = 7
-}
 local block_coords = {
     x = 896,
     y = 835,
@@ -314,14 +296,14 @@ local images = {
             h = 500
         }
     }),
-    circle_overlay = util.make_image(circle_overlay_path, {
+    circle_overlay = helpers.res_image(circle_overlay_path, {
         dst = {
             x = 0,
             y = 0,
             w = 2560,
             h = 1600
         }
-    }),
+    }, thin_res[1], thin_res[2]),
     oneshot_overlay = util.make_image(oneshot_overlay_path, {
         dst = {
             x = 0,
@@ -333,15 +315,6 @@ local images = {
 }
 
 local text_configs = {
-    memory_left = {
-        value = "Mem: N/A",
-        x = 350,
-        y = 200,
-        outline_size = 2,
-        size = 6,
-        color = colors.soft_pink,
-        outline_color = colors.magenta
-    },
     preemptive = {
         value = "51 pure\n61 chest front\n67 chest back",
         -- value = "29 pure\n47 chest front\n61 chest back",
@@ -351,202 +324,12 @@ local text_configs = {
         size = 6,
         color = colors.soft_pink,
         outline_color = colors.magenta
-    },
-    chat_input = {
-        value = "Hello World!",
-        x = 1490,
-        y = 1250,
-        outline_size = 2,
-        size = 5,
-        color = colors.soft_pink,
-        outline_color = colors.magenta
     }
 }
 
 local texts = {
-    memory_left = util.make_outlined_text(text_configs.memory_left),
-    preemptive = util.make_outlined_text(text_configs.preemptive),
-    chat_input = util.make_outlined_text(text_configs.chat_input)
+    preemptive = util.make_outlined_text(text_configs.preemptive)
 }
-
-local normalize_key = function(key)
-    key = key:match("([^-]*)$")
-    key = key:lower()
-    return key
-end
-
-local key_to_char = {
-    ["space"] = " ",
-    ["equal"] = "=",
-    ["comma"] = ",",
-    ["minus"] = "-",
-    ["period"] = ".",
-    ["slash"] = "/",
-    ["0"] = "0",
-    ["1"] = "1",
-    ["2"] = "2",
-    ["3"] = "3",
-    ["4"] = "4",
-    ["5"] = "5",
-    ["6"] = "6",
-    ["7"] = "7",
-    ["8"] = "8",
-    ["9"] = "9",
-    ["semicolon"] = ";",
-    ["bracketleft"] = "[",
-    ["backslash"] = "\\",
-    ["bracketright"] = "]",
-    ["apostrophe"] = "'",
-    ["grave"] = "`",
-    ["a"] = "a",
-    ["b"] = "b",
-    ["c"] = "c",
-    ["d"] = "d",
-    ["e"] = "e",
-    ["f"] = "f",
-    ["g"] = "g",
-    ["h"] = "h",
-    ["i"] = "i",
-    ["j"] = "j",
-    ["k"] = "k",
-    ["l"] = "l",
-    ["m"] = "m",
-    ["n"] = "n",
-    ["o"] = "o",
-    ["p"] = "p",
-    ["q"] = "q",
-    ["r"] = "r",
-    ["s"] = "s",
-    ["t"] = "t",
-    ["u"] = "u",
-    ["v"] = "v",
-    ["w"] = "w",
-    ["x"] = "x",
-    ["y"] = "y",
-    ["z"] = "z",
-    ["braceleft"] = "{",
-    ["braceright"] = "}",
-    ["nobreakspace"] = " ",
-    ["hyphen"] = "-"
-}
-
-local key_to_shift = {
-    ["1"] = "!",
-    ["2"] = "@",
-    ["3"] = "#",
-    ["4"] = "$",
-    ["5"] = "%",
-    ["6"] = "^",
-    ["7"] = "&",
-    ["8"] = "*",
-    ["9"] = "(",
-    ["0"] = ")",
-    ["'"] = "\"",
-    [";"] = ":",
-    [","] = "<",
-    ["="] = "+",
-    ["."] = ">",
-    ["/"] = "?",
-    ["-"] = "_",
-    ["\\"] = "|",
-    ["`"] = "~"
-}
-
-local special_chat_keys = {"Backspace", "Return", "Escape", "Up", "Down"}
-local chat_state = {
-    active = false
-}
-
-local input_chat_key = function(chat_key)
-    if chat_key == "Return" then
-        io.popen(util.config_folder("send_twitch_message.sh") .. " " .. util.config_folder(".twitch_token") .. " '" ..
-                     string.sub(string.gsub(text_configs.chat_input.value, "'", "'\\''") .. "'", 2)):close()
-        text_configs.chat_input.value = ""
-        chat_state.active = false
-    elseif chat_key == "Escape" then
-        text_configs.chat_input.value = ""
-        chat_state.active = false
-    elseif chat_key == "Backspace" then
-        if string.len(text_configs.chat_input.value) > 1 then
-            text_configs.chat_input.value = string.sub(text_configs.chat_input.value, 1, -2)
-        end
-    elseif chat_key == "Up" then
-        if string.len(text_configs.chat_input.value) > 1 then
-            last_char = string.sub(text_configs.chat_input.value, -1)
-            text_configs.chat_input.value = string.sub(text_configs.chat_input.value, 1, -2) ..
-                                                (key_to_shift[last_char] or last_char:upper())
-        end
-    elseif chat_key == "Down" then
-        if string.len(text_configs.chat_input.value) > 1 then
-            last_char = string.sub(text_configs.chat_input.value, -1)
-            found = false
-            for key, value in pairs(key_to_shift) do
-                if value == last_char then
-                    text_configs.chat_input.value = string.sub(text_configs.chat_input.value, 1, -2) .. key
-                    found = true
-                    break
-                end
-            end
-            if not found then
-                text_configs.chat_input.value = string.sub(text_configs.chat_input.value, 1, -2) .. last_char:lower()
-            end
-        end
-    else
-        text_configs.chat_input.value = text_configs.chat_input.value .. (key_to_char[chat_key] or chat_key)
-    end
-    texts.chat_input(false)
-    texts.chat_input(true)
-end
-
--- evil evil function
-local add_chat_actions = function(actions)
-    local existing_actions = {}
-
-    for original_key, value in pairs(actions) do
-        key = normalize_key(original_key)
-        if not existing_actions[key] then
-            existing_actions[key] = {}
-        end
-        table.insert(existing_actions[key], {original_key, value})
-    end
-
-    for chat_key, _ in pairs(key_to_char) do
-        if existing_actions[chat_key] then
-            for _, kvp in ipairs(existing_actions[chat_key]) do
-                local original_key, original_function = kvp[1], kvp[2]
-                actions[original_key] = function()
-                    if not chat_state.active then
-                        return original_function()
-                    else
-                        input_chat_key(chat_key)
-                        return true
-                    end
-                end
-            end
-        end
-        if not actions["*-" .. chat_key] then
-            actions["*-" .. chat_key] = function()
-                if not chat_state.active then
-                    return false
-                else
-                    input_chat_key(chat_key)
-                    return true
-                end
-            end
-        end
-    end
-
-    for _, special_key in ipairs(special_chat_keys) do
-        actions[special_key] = function()
-            if not chat_state.active then
-                return false
-            else
-                input_chat_key(special_key)
-                return true
-            end
-        end
-    end
-end
 
 local browser_sources = {
     spotify = {
@@ -578,10 +361,18 @@ local browser_sources = {
             waywall.exec('uv run --project ' .. all_portals_overlay_path .. ' ' .. all_portals_overlay_path ..
                              '/main.py')
         end
+    },
+    canvas_overlay = {
+        url = "http://localhost:5003/",
+        preload = util.config_folder("preload-canvas.js"),
+        width = 2560,
+        height = 1600,
+        exec_before = function()
+            waywall.exec('uv run --project ' .. canvas_overlay_path .. ' ' .. canvas_overlay_path .. '/main.py')
+        end
     }
 }
 
--- local base_sens = 5.7
 local base_sens = 5.7 * 1.6666666
 
 local config = {
@@ -595,7 +386,9 @@ local config = {
         remaps = {
             ["MB4"] = "HOME",
             ["MB5"] = "END",
-            ["LEFTALT"] = "TAB"
+            ["LEFTALT"] = "TAB",
+            ["Q"] = "O",
+            ["O"] = "Q"
         }
     },
     theme = {
@@ -631,10 +424,6 @@ local is_ninb_running = function()
     return util.exec_unsafe("pgrep -f 'Ninjabrain.*jar'") ~= nil
 end
 
-local get_memory_left = function()
-    return util.exec_unsafe("free -m | awk '/^Mem:/ {print $7}'")
-end
-
 local exec_ninb = function()
     waywall.exec("java -Dawt.useSystemAAFontSettings=on -Dsun.java2d.uiScale=1.0 -jar " .. ninjabrain_bot_path)
 end
@@ -651,32 +440,20 @@ local exec_browser_sources = function()
 end
 
 local mirrors = {
-    e_counter = util.make_mirror({
-        src = e_counter_src,
-        dst = {
-            x = thin_e_counter.x,
-            y = thin_e_counter.y,
-            w = e_counter_src.w * thin_e_counter.size,
-            h = e_counter_src.h * thin_e_counter.size
+    e_counter = util.shadowed_res_mirror({
+        src = {
+            x = 13,
+            y = 37,
+            w = 37,
+            h = 9
         },
-        color_key = {
-            input = colors.base_f3_text,
-            output = colors.magenta
-        }
-    }),
-    e_counter_shadow = util.make_mirror({
-        src = e_counter_src,
         dst = {
-            x = thin_e_counter.x + 4,
-            y = thin_e_counter.y + 4,
-            w = e_counter_src.w * thin_e_counter.size,
-            h = e_counter_src.h * thin_e_counter.size
-        },
-        color_key = {
-            input = colors.base_f3_text,
-            output = colors.pink
+            x = 1490,
+            y = 400,
+            w = 37 * 7,
+            h = 9 * 7
         }
-    }),
+    }, 4, colors.base_f3_text, colors.magenta, colors.pink, thin_res[1], thin_res[2]),
     block_coords = util.make_mirror({
         src = block_coords_src,
         dst = {
@@ -687,16 +464,7 @@ local mirrors = {
         },
         shader = "block_coords"
     }),
-    pie_magnifier = util.make_mirror({
-        src = full_pie_src,
-        dst = {
-            x = full_pie_src.x + full_pie_src.w * (-full_pie_scale + 1),
-            y = full_pie_src.y + full_pie_src.h * (-full_pie_scale + 1),
-            w = full_pie_src.w * full_pie_scale,
-            h = full_pie_src.h * full_pie_scale
-        }
-    }),
-    thin_pie_entities = util.make_mirror({
+    thin_pie_entities = helpers.res_mirror({
         src = pie_src,
         dst = {
             x = thin_pie.x,
@@ -708,8 +476,8 @@ local mirrors = {
             input = colors.base_entities,
             output = colors.magenta
         }
-    }),
-    thin_pie_unspecified = util.make_mirror({
+    }, thin_res[1], thin_res[2]),
+    thin_pie_unspecified = helpers.res_mirror({
         src = pie_src,
         dst = {
             x = thin_pie.x,
@@ -721,8 +489,8 @@ local mirrors = {
             input = colors.base_unspecified,
             output = colors.magenta
         }
-    }),
-    thin_pie_blockentities = util.make_mirror({
+    }, thin_res[1], thin_res[2]),
+    thin_pie_blockentities = helpers.res_mirror({
         src = pie_src,
         dst = {
             x = thin_pie.x,
@@ -734,8 +502,8 @@ local mirrors = {
             input = colors.base_blockentities,
             output = colors.pink
         }
-    }),
-    thin_pie_destroyProgress = util.make_mirror({
+    }, thin_res[1], thin_res[2]),
+    thin_pie_destroyProgress = helpers.res_mirror({
         src = pie_src,
         dst = {
             x = thin_pie.x,
@@ -747,8 +515,8 @@ local mirrors = {
             input = colors.base_destroyProgress,
             output = colors.magenta
         }
-    }),
-    thin_pie_prepare = util.make_mirror({
+    }, thin_res[1], thin_res[2]),
+    thin_pie_prepare = helpers.res_mirror({
         src = pie_src,
         dst = {
             x = thin_pie.x,
@@ -760,8 +528,8 @@ local mirrors = {
             input = colors.base_prepare,
             output = colors.magenta
         }
-    }),
-    thin_percent_blockentities = util.make_mirror({
+    }, thin_res[1], thin_res[2]),
+    thin_percent_blockentities = helpers.res_mirror({
         src = percent_src,
         dst = {
             x = thin_percent.x,
@@ -773,8 +541,8 @@ local mirrors = {
             input = colors.base_blockentities_percent,
             output = colors.pink
         }
-    }),
-    thin_percent_unspecified = util.make_mirror({
+    }, thin_res[1], thin_res[2]),
+    thin_percent_unspecified = helpers.res_mirror({
         src = percent_src,
         dst = {
             x = thin_percent.x,
@@ -786,7 +554,7 @@ local mirrors = {
             input = colors.base_unspecified_percent,
             output = colors.magenta
         }
-    }),
+    }, thin_res[1], thin_res[2]),
     eye_measure = util.make_mirror({
         src = {
             x = 162,
@@ -842,14 +610,10 @@ local last_mirror_state = {
 }
 
 local last_state = {
-    screen = "wall"
+    screen = ""
 }
 
 local oneshot_overlay_state = {
-    enabled = false
-}
-
-local full_pie_state = {
     enabled = false
 }
 
@@ -859,7 +623,6 @@ local show_mirrors = function(eye, f3, tall, thin, wide)
     else
         waywall.set_sensitivity(base_sens)
     end
-    text_configs.memory_left.value = "Mem: " .. get_memory_left() .. " MB"
 
     last_mirror_state = {
         eye = eye,
@@ -869,32 +632,16 @@ local show_mirrors = function(eye, f3, tall, thin, wide)
         wide = wide
     }
     mirrors.timer_cosmetics(not (eye or f3 or tall or thin or wide or last_state.screen == "wall"))
-    mirrors.pie_magnifier(not (eye or f3 or tall or thin or wide))
     mirrors.cosmetics(not (eye or f3 or tall or thin or wide))
     mirrors.eye_measure(eye)
 
     images.measuring_overlay(eye)
     images.oneshot_overlay(oneshot_overlay_state.enabled and not (eye or f3 or tall or thin or wide))
-    mirrors.pie_magnifier(full_pie_state.enabled and not (eye or f3 or tall or thin or wide))
-
-    texts.memory_left(thin or wide)
-
-    mirrors.e_counter(f3)
-    mirrors.e_counter_shadow(f3)
 
     mirrors.cosmetics(last_state.screen == "wall")
     mirrors.block_coords(true)
 
     texts.preemptive(thin)
-    images.circle_overlay(thin)
-    mirrors.thin_pie_entities(thin)
-    mirrors.thin_pie_unspecified(thin)
-    mirrors.thin_pie_blockentities(thin)
-    mirrors.thin_pie_destroyProgress(thin)
-    mirrors.thin_pie_prepare(thin)
-
-    mirrors.thin_percent_blockentities(thin)
-    mirrors.thin_percent_unspecified(thin)
 end
 
 local thin_enable = function()
@@ -928,21 +675,27 @@ local make_res = function(width, height, enable, disable)
 end
 
 local resolutions = {
-    thin = make_res(350, 1600, thin_enable, res_disable),
+    thin = make_res(thin_res[1], thin_res[2], thin_enable, res_disable),
     tall = make_res(384, 16384, tall_enable, res_disable),
     wide = make_res(2560, 400, wide_enable, res_disable)
 }
 
 waywall.listen("load", function()
-    chat_state.active = false
+
 end)
 
 waywall.listen("state", function()
+    local inworld = waywall.state().inworld;
+    if inworld == "unpaused" then
+        io.popen("curl -X POST http://localhost:5003/message -d \"message={\\\"cursorGrabbed\\\":true}\""):close()
+    elseif inworld ~= "unpaused" then
+        io.popen("curl -X POST http://localhost:5003/message -d \"message={\\\"cursorGrabbed\\\":false}\""):close()
+    end
     if waywall.state().screen ~= last_state.screen then
-        local from = last_state.screen
-        local to = waywall.state().screen
-        last_state = waywall.state()
-        if from ~= to then
+        local from = last_state
+        local to = waywall.state()
+        last_state = to
+        if from.screen ~= to.screen then
             show_mirrors(last_mirror_state.eye, last_mirror_state.f3, last_mirror_state.tall, last_mirror_state.thin,
                 last_mirror_state.wide)
             thin_enable()
@@ -974,8 +727,6 @@ config.actions = {
         helpers.toggle_floating()
     end,
 
-    [toggle_fullscreen_key] = waywall.toggle_fullscreen,
-
     [startup_programs_key] = function()
         standard_settings.write_settings(settings, standard_settings_path)
         print("Saved settings to " .. standard_settings_path)
@@ -994,21 +745,6 @@ config.actions = {
         return false
     end,
 
-    [enable_full_pie_key] = function()
-        full_pie_state.enabled = not full_pie_state.enabled
-        thin_enable()
-        res_disable()
-        return false
-    end,
-
-    [chat_message_key] = function()
-        text_configs.chat_input.value = ">"
-        texts.chat_input(false)
-        texts.chat_input(true)
-        chat_state.active = true
-        return false
-    end,
-
     ["*-Ctrl-Shift-Left"] = function()
         io.popen("curl -X POST http://localhost:5002/message -d \"message={\\\"type\\\":\\\"prev\\\"}\""):close()
     end,
@@ -1018,6 +754,31 @@ config.actions = {
     end
 }
 
--- add_chat_actions(config.actions)
+require("ww_command_line.init").setup(config, {
+    start_key = "Ctrl-Shift-T",
+    enter_key = "Return",
+    look = {
+        x = 200,
+        y = 200,
+        size = 7,
+        color = colors.soft_pink,
+        completion_color = colors.magenta
+    },
+    add_inputs = {
+        ["minus"] = "-",
+        ["Shift-period"] = ">",
+        ["Shift-comma"] = "<",
+        ["period"] = "."
+    },
+    commands = {
+        ["chat"] = function(args)
+            io.popen(
+                util.config_folder("send_twitch_message.sh") .. " " .. util.config_folder(".twitch_token") .. " '" ..
+                    string.gsub(table.concat(args, " "), "'", "'\\''") .. "'"):close()
+        end
+    },
+    arbitrary_command = function(key)
+    end
+})
 
 return config
